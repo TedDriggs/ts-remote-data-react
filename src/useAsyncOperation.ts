@@ -33,10 +33,16 @@ const never = (): never => {
  *
  * @returns A `RemoteData` representation of the promise's results. The hook
  * forces a rerender when the promise resolves or rejects. If `op === undefined`
- * the hook will return `RemoteData.NOT_ASKED`.
+ * or `op` synchronously returns `undefined`, the hook will return
+ * `RemoteData.NOT_ASKED`.
+ *
+ * Note that using the `async` keyword on the function means that `return;` will
+ * cause the operation be complete with a value of `undefined`, rather than
+ * `RemoteData.NOT_ASKED`, because in that situation `op` will technically have
+ * returned `Promise.resolve()` rather than `undefined`.
  */
 export const useAsyncOperation = <T extends unknown>(
-    op: ((signal: AbortSignal) => Promise<T>) | undefined,
+    op: ((signal: AbortSignal) => Promise<T> | undefined) | undefined,
     // tslint:disable-next-line: no-any
     deps: ReadonlyArray<any>,
 ): RemoteData<T> => {
