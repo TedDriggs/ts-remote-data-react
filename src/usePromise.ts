@@ -25,7 +25,7 @@ export const usePromise = <T extends unknown>(
     // fulfillment, applying this eagerly and in the effect should never lead
     // to a double-wrapped rejection.
     const catchingPromise = useMemo(
-        () => promise?.catch(RemoteData.failWith),
+        () => (promise ? promise.catch(RemoteData.failWith) : promise),
         [promise],
     );
 
