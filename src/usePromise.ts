@@ -3,7 +3,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE', which is part of this source code package.
 
-import { useDebugValue, useEffect, useState } from 'react';
+import { useDebugValue, useEffect, useMemo, useState } from 'react';
 import RemoteData from 'ts-remote-data';
 
 /**
@@ -19,11 +19,21 @@ import RemoteData from 'ts-remote-data';
 export const usePromise = <T extends unknown>(
     promise?: Promise<T>,
 ): RemoteData<T> => {
+    // The eager application of `catch` is present to avoid a promise being
+    // considered an unhandled rejection due to useEffect taking too long to
+    // run. Since `RemoteData.failWith` converts a rejection into a wrapped
+    // fulfillment, applying this eagerly and in the effect should never lead
+    // to a double-wrapped rejection.
+    const catchingPromise = useMemo(
+        () => promise?.catch(RemoteData.failWith),
+        [promise],
+    );
+
     const [data, setData] = useState<RemoteData<T>>(
         // Promises have no concept of a "not-started" state, so if we are given
         // a non-void promise we jump straight to the `LOADING` state to remain
         // in sync.
-        promise ? RemoteData.LOADING : RemoteData.NOT_ASKED,
+        catchingPromise ? RemoteData.LOADING : RemoteData.NOT_ASKED,
     );
 
     useEffect(() => {
@@ -34,21 +44,21 @@ export const usePromise = <T extends unknown>(
          * cleanup.
          */
         let isStillRelevant = true;
-        if (!promise) {
+        if (!catchingPromise) {
             setData(RemoteData.NOT_ASKED);
             return;
         }
 
         setData(RemoteData.LOADING);
 
-        promise.catch(RemoteData.failWith).then(result => {
+        catchingPromise.then((result) => {
             if (isStillRelevant) setData(result);
         });
 
         return () => {
             isStillRelevant = false;
         };
-    }, [promise]);
+    }, [catchingPromise]);
 
     useDebugValue(data);
 
