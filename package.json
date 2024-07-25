@@ -1,6 +1,6 @@
 {
     "name": "ts-remote-data-react",
-    "version": "0.3.1-beta",
+    "version": "0.3.1-beta.2",
     "description": "Components and hooks for using RemoteData in React",
     "author": {
         "name": "Ted Driggs",
