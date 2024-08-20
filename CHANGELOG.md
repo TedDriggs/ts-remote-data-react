@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.2 (Aug 20, 2024)
+
+- Add `useDebugValue` to `useAsyncOperation`, exposing the return value as the debug value
+
 ## 0.3.1 (Aug 16, 2024)
 
 - Allow React 17 and 18

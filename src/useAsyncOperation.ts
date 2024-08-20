@@ -3,7 +3,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE', which is part of this source code package.
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useDebugValue, useEffect, useMemo } from 'react';
 import RemoteData from 'ts-remote-data';
 
 import { usePromise } from './usePromise';
@@ -53,5 +53,7 @@ export const useAsyncOperation = <T extends unknown>(
         [runner, controller],
     );
     useEffect(() => () => controller.abort(), [controller, promise]);
-    return usePromise(promise);
+    const value = usePromise(promise);
+    useDebugValue(value);
+    return value;
 };
